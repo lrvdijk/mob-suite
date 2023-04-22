@@ -17,7 +17,7 @@ from mob_suite.utils import \
 from mob_suite.wrappers import mash
 
 from mob_suite.constants import LOG_FORMAT, ACS_LETTER_VALUES, ACS_FORMAT_VALUES, ACS_VALUES_TO_LETTERS, MAX_ACS_VALUE, \
-    MOB_TYPER_REPORT_HEADER, MOB_CLUSTER_INFO_HEADER
+    MOB_TYPER_REPORT_HEADER, MOB_CLUSTER_INFO_HEADER, default_database_dir
 
 
 def init_console_logger(lvl):
@@ -52,15 +52,21 @@ def parse_args():
                         help='Mash distance for assigning primary cluster id 0 - 1', default=0.06)
     parser.add_argument('--secondary_cluster_dist', type=float, required=False,
                         help='Mash distance for assigning primary cluster id 0 - 1', default=0.025)
+    parser.add_argument('-d', '--database_directory',
+                        default=default_database_dir,
+                        required=False,
+                        help='Directory you want to use for your databases. If the databases are not already '
+                             'downloaded, they will be downloaded automatically. Defaults to %(default)s.')
     parser.add_argument('--debug', required=False, help='Show debug information', action='store_true')
     parser.add_argument('-V', '--version', action='version', version="%(prog)s " + __version__)
+
     return parser.parse_args()
 
 
 '''
     Input: Accession string
     Return: True if string is in valid format : [A-Z][A-Z][0-9][0-9][0-9] else False
-    
+
 '''
 
 
@@ -80,7 +86,7 @@ def validate_acs_format(accession):
 '''
     Input: Accession string ie. AA000
     Return: returns positive numerical integer value of Accession string, else returns -1
-    
+
 
 '''
 
@@ -374,7 +380,7 @@ def getUniqSeqKeys(md5_new_seq_lookup, md5_mobcluster_seq_lookup):
 
 
 '''
-    Input: Two dictionaries with identical sets of keys with seqStats produced by calcFastaStatsIndividual 
+    Input: Two dictionaries with identical sets of keys with seqStats produced by calcFastaStatsIndividual
     and userMeta produced by read_user_new_sequence_info
     Output: Combined dictionary with the elements from both dictionaries
 '''
@@ -449,7 +455,12 @@ def main():
         logging = init_console_logger(3)
     else:
         logging = init_console_logger(2)
+
+    database_dir = os.path.abspath(args.database_directory)
+    ETE3DBTAXAFILE = os.path.abspath(database_dir + "/taxa.sqlite")
+
     logging.info('Running Mob-Suite Clustering toolkit v. {}'.format(__version__))
+    logging.info("Database directory %s", database_dir)
     logging.info('Processing fasta file {}'.format(args.infile))
     logging.info('Analysis directory {}'.format(args.outdir))
 
@@ -525,7 +536,7 @@ def main():
         if seq_id in new_seq_info:
             new_seq_info[seq_id]['organism'] = organism
 
-    taxids = NamesToTaxIDs(organisms)
+    taxids = NamesToTaxIDs(organisms, ETE3DBTAXAFILE)
     del(organisms)
 
     for seq_id in new_seq_info:
