@@ -121,7 +121,7 @@ def getTaxid(taxon,ETE3DBTAXAFILE):
 
 
 
-def NamesToTaxIDs(names,ETE3DBTAXAFILE):
+def NamesToTaxIDs(names, ETE3DBTAXAFILE):
     if not isETE3DBTAXAFILEexists(ETE3DBTAXAFILE):
         logging.info("Did not find taxa.sqlite in {}. Initializaing ete3 taxonomy database".format(ETE3DBTAXAFILE))
         initETE3Database(ETE3DBTAXAFILE)
@@ -330,7 +330,7 @@ def blastn(input_fasta, blastdb, min_ident, min_cov, evalue, min_length, out_dir
 
     blast_df = blast_df.reset_index(drop=True)
     blast_df = fixStart(blast_df)
-    blast_df.to_csv(blast_results_file, sep='\t', header=True, line_terminator='\n', index=False)
+    blast_df.to_csv(blast_results_file, sep='\t', lineterminator='\n', header=True, index=False)
 
     return True
 
@@ -357,7 +357,7 @@ def tblastn(input_fasta, blastdb, min_ident, min_covs, evalue, out_dir, blast_re
     blast_df = fixStart(blast_df)
     blast_df = blast_df.sort_values(['sseqid', 'sstart', 'send', 'bitscore'], ascending=[True, True, True, False])
     blast_df = blast_df.reset_index(drop=True)
-    blast_df.to_csv(blast_results_file, sep='\t', header=True, line_terminator='\n', index=False)
+    blast_df.to_csv(blast_results_file, sep='\t', lineterminator='\n', header=True, index=False)
 
     return True
 
